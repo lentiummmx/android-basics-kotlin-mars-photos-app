@@ -26,15 +26,30 @@ import kotlinx.coroutines.launch
 import java.lang.Exception
 
 /**
+Definition:
+<code>
+enum class Direction {
+    NORTH, SOUTH, WEST, EAST
+}
+</code>
+Usage:
+<code>
+var direction : Direction = Direction.NORTH
+</code>
+ */
+enum class MarsApiStatus { LOADING, ERROR, DONE }
+
+
+/**
  * The [ViewModel] that is attached to the [OverviewFragment].
  */
 class OverviewViewModel : ViewModel() {
 
     // The internal MutableLiveData that stores the status of the most recent request
-    private val _status = MutableLiveData<String>()
+    private val _status = MutableLiveData<MarsApiStatus>()
 
     // The external immutable LiveData for the request status
-    val status: LiveData<String> = _status
+    val status: LiveData<MarsApiStatus> = _status
 
     private val _photos = MutableLiveData<List<MarsPhoto>>()
 
@@ -64,13 +79,14 @@ class OverviewViewModel : ViewModel() {
                 // handle the exception to avoid abrupt termination.
             }
             */
-
+            _status.value= MarsApiStatus.LOADING
             try {
                 val listResult = MarsApi.retrofitService.getPhotos()
                 _photos.value = listResult
-                _status.value = "Success: Mars properties retrieved"
+                _status.value = MarsApiStatus.DONE
             } catch (e: Exception) {
-                _status.value = "Failure: ${e.message}"
+                _status.value = MarsApiStatus.ERROR
+                _photos.value = listOf()
             }
         }
     }
